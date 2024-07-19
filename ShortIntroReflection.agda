@@ -92,8 +92,8 @@ lemma-n+0 {(succ n)} with lemma-n+0 {n}
 -- Suppose now, given a term (n + zero) : ℕ, we want rewrite it to
 -- (n). One way to do it mannual is:
 
---  n + y ≡< lemma-n+0 >
---  y + x
+--  n + 0 ≡< lemma-n+0 >
+--  n
 
 rewrite-manually : ∀ n -> succ (n + zero) == succ n
 rewrite-manually n = cong succ lemma-n+0
