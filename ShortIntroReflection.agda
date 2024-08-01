@@ -197,7 +197,7 @@ eg-quote = refl
 eg-unquote-refl : zero == zero
 eg-unquote-refl = unquote (\h -> unify h (quoteTerm (refl {ℕ} {zero})))
 
--- It do seem unquote cancels quoteTerm. But!!! only in Agda's TC
+-- It do seem unquote cancels quoteTerm, but *****only***** in Agda's TC
 -- monad. TC is short for TypeChecking. So we can only have (1) inside
 -- TC monad. Luckily, one of the side-effect of TC is that it make
 -- some holes satisfied when used properly. So we don't really need
