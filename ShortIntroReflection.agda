@@ -72,18 +72,18 @@ data _==_ {A : Set}(a : A) : A -> Set where
   refl : a == a
 
 sym : ∀ {A : Set} {a b : A} -> a == b -> b == a
-sym {A} {a} {.a} refl = refl
+sym refl = refl
 
 trans : ∀ {A : Set}{a b c : A} -> a == b -> b == c -> a == c
-trans {A} {a} {.a} {.a} refl refl = refl
+trans refl refl = refl
 
 cong : ∀ {A B : Set} {a a' : A} ->
        (f : A -> B) -> a == a' -> f a == f a'
-cong {A} {B} {a} {.a} f refl = refl
+cong f refl = refl
 
 cong2 : ∀ {A B C : Set} {a a' : A} {b b' : B} ->
         (f : A -> B -> C) -> a == a' -> b == b' -> f a b == f a' b'
-cong2 {A} {B} {C} {a} {.a} {b} {.b} f refl refl = refl
+cong2 f refl refl = refl
 
 -- A lemma says n + 0 = 0 for all n.
 lemma-n+0 : ∀ {n : ℕ} -> n + zero == n
