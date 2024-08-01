@@ -77,10 +77,12 @@ sym {A} {a} {.a} refl = refl
 trans : ∀ {A : Set}{a b c : A} -> a == b -> b == c -> a == c
 trans {A} {a} {.a} {.a} refl refl = refl
 
-cong : ∀ {A B : Set} {a a' : A} -> (f : A -> B) -> a == a' -> f a == f a'
+cong : ∀ {A B : Set} {a a' : A} ->
+       (f : A -> B) -> a == a' -> f a == f a'
 cong {A} {B} {a} {.a} f refl = refl
 
-cong2 : ∀ {A B C : Set} {a a' : A} {b b' : B} -> (f : A -> B -> C) -> a == a' -> b == b' -> f a b == f a' b'
+cong2 : ∀ {A B C : Set} {a a' : A} {b b' : B} ->
+        (f : A -> B -> C) -> a == a' -> b == b' -> f a b == f a' b'
 cong2 {A} {B} {C} {a} {.a} {b} {.b} f refl refl = refl
 
 -- A lemma says n + 0 = 0 for all n.
