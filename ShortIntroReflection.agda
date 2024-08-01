@@ -181,12 +181,10 @@ open import Agda.Builtin.List
 -- We use quoteTerm to get the Agda-AST of an expression.
 eg-quote : quoteTerm (zero + zero) ==
   def (quote _+_)
-  (arg (arg-info visible (modality relevant quantity-ω))
-   (con (quote zero) [])
-   ∷
-   arg (arg-info visible (modality relevant quantity-ω))
-   (con (quote zero) [])
-   ∷ [])
+      (let modalityω = modality relevant quantity-ω in
+       arg (arg-info visible modalityω) (con (quote zero) []) ∷
+       arg (arg-info visible modalityω) (con (quote zero) []) ∷
+       [])
 eg-quote = refl
 
 -- The important thing is if we do unquote to Agda's AST, we sort of
