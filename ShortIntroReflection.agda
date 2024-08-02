@@ -21,7 +21,7 @@
 -- "isomorphic" to the term's structure (or, that captures the main
 -- structure of the term). E.g. the structure of the term "x + y * z"
 -- with x y z being variables, can be captured by a syntax tree. The
--- parsing from term to AST is by hand, i.e., we have to mannually
+-- parsing from term to AST is by hand, i.e., we have to manually
 -- type "x :+ y :* z" to build the AST for the term.
 
 -- Both share "reflection" i.e. manipulating the term (program) by
@@ -33,7 +33,7 @@
 
 -- By combining two, I mean, use 1) to get Agda-AST automatically, and
 -- then translate AGDA-AST to user-defined AST and then doing proof
--- under 2). This save's 2)'s mannually typing part. We will see there
+-- under 2). This save's 2)'s manually typing part. We will see there
 -- is complications in this combining.
 
 -- We only explain the first kind. For the second kind, there is a
@@ -92,7 +92,7 @@ lemma-n+0 {(succ n)} with lemma-n+0 {n}
 ... | ih = cong succ ih
 
 -- Suppose now, given a term (n + zero) : ℕ, we want rewrite it to
--- (n). One way to do it mannual is:
+-- (n). One way to do it manual is:
 
 --  n + 0 ≡< lemma-n+0 >
 --  n
@@ -105,7 +105,7 @@ rewrite-manually n = cong succ lemma-n+0
 -- dont have rewrite keyword anymore.
 
 -- If we have many such rewritings, it would be too much trouble to do
--- it mannually. Another way is to translate it to, say, a string, and
+-- it manually. Another way is to translate it to, say, a string, and
 -- we write a program that search for "n + 0" and replace it with
 -- "n". Then we tranlate the string back to terms, and somehow we
 -- insert "lemma-n+0" at right place. We probably need some structure
@@ -135,7 +135,7 @@ test-f : (f (succ zero) (Leaf zero :+ Leaf zero :+ Leaf (succ zero) :+ Leaf zero
   == (Leaf zero :+ Leaf zero :+ Leaf (succ zero))
 test-f = refl
 
--- how should we parse expression to AST? At least we can do mannual
+-- how should we parse expression to AST? At least we can do manual
 -- parsing for finitely many expressions..... For now, suppose we have
 -- the translations:
 
@@ -225,7 +225,7 @@ eg-unquote' = unquote refl0
 -- Actually, to unquote is to perform the computation "m : Term → TC
 -- ⊤". (i.e. a TC monad computation with return type ⊤ parameterised
 -- by Term). unquote will triggler the following sequence according to
--- agda mannual:
+-- agda manual:
 
 -- (1) Check if "m" is of type "Term → TC ⊤".
 
