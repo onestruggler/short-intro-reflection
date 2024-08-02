@@ -68,13 +68,13 @@ succ x =? succ y = x =? y
 -- Equality, and equality is an equivalence relation, and a
 -- congruence.
 infix 6 _==_
-data _==_ {A : Set}(a : A) : A -> Set where
+data _==_ {A : Set} (a : A) : A -> Set where
   refl : a == a
 
 sym : ∀ {A : Set} {a b : A} -> a == b -> b == a
 sym refl = refl
 
-trans : ∀ {A : Set}{a b c : A} -> a == b -> b == c -> a == c
+trans : ∀ {A : Set} {a b c : A} -> a == b -> b == c -> a == c
 trans refl refl = refl
 
 cong : ∀ {A B : Set} {a a' : A} ->
