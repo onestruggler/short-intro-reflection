@@ -28,8 +28,9 @@
 -- AST, and not excuting the term directly.
 
 -- Both 1) and 2) are used in Agda programming. Combing two seems
--- good, and actually, many have done so, just search "agda
--- reflection" in github, you will see a couple of interesting repos.
+-- good, and actually, many have done so -- a quick GitHub search for
+-- just search "agda reflection" should yield a couple of interesting
+-- repos.
 
 -- By combining two, I mean, use 1) to get Agda-AST automatically, and
 -- then translate AGDA-AST to user-defined AST and then doing proof
