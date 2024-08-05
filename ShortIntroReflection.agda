@@ -143,7 +143,7 @@ test-f = refl
 -- [_] : arithmetic expression -> AST
 -- ⟦_⟧ : AST -> arithemtic expression
 
--- AST to expression is always easy:
+-- AST to expression is easy:
 ⟦_⟧ : AST -> ℕ
 ⟦ Leaf x ⟧ = x
 ⟦ x :+ x₁ ⟧ = ⟦ x ⟧ + ⟦ x₁ ⟧
