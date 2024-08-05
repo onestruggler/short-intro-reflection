@@ -132,8 +132,8 @@ f n (l :+ r) = f n l :+ f n r
 
 -- So "f n" rewrites all "Leaf n :+ Leaf 0" to "Leaf n".
 
-test-f : (f (succ zero) (Leaf zero :+ Leaf zero :+ Leaf (succ zero) :+ Leaf zero))
-  == (Leaf zero :+ Leaf zero :+ Leaf (succ zero))
+test-f : _==_ (f (succ zero) (Leaf zero :+ Leaf zero :+ Leaf (succ zero) :+ Leaf zero))
+              (Leaf zero :+ Leaf zero :+ Leaf (succ zero))
 test-f = refl
 
 -- how should we parse expression to AST? At least we can do manual
