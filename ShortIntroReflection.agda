@@ -18,24 +18,23 @@
 
 -- 2) The kind that doesn't need keyword support, which reflects on an
 -- Agda term by manipulating a user-defined AST that is somehow
--- "isomorphic" to the term's structure (or, that captures the main
--- structure of the term). E.g. the structure of the term "x + y * z"
+-- "isomorphic" to the term's structure, i.e., captures the main
+-- structure of the term. E.g. the structure of the term "x + y * z"
 -- with x y z being variables, can be captured by a syntax tree. The
 -- parsing from term to AST is by hand, i.e., we have to manually
 -- type "x :+ y :* z" to build the AST for the term.
 
--- Both share "reflection" i.e. manipulating the term (program) by
+-- Both share "reflection", i.e., manipulating the term (program) by
 -- AST, and not excuting the term directly.
 
 -- Both 1) and 2) are used in Agda programming. Combing two seems
 -- good, and actually, many have done so -- a quick GitHub search for
--- just search "agda reflection" should yield a couple of interesting
--- repos.
+-- "agda reflection" should yield a couple of interesting repos.
 
 -- By combining two, I mean, use 1) to get Agda-AST automatically, and
--- then translate AGDA-AST to user-defined AST and then doing proof
--- under 2). This save's 2)'s manually typing part. We will see there
--- is complications in this combining.
+-- then translate Agda-AST to user-defined AST and then do the proof
+-- under 2). This prevents 2)'s manually typing part. We will see that
+-- there are complications in this combining.
 
 -- We only explain the first kind. For the second kind, there is a
 -- very short and nice explanation in Section 4 of:
@@ -44,7 +43,7 @@
 {-# OPTIONS --without-K --safe --cubical-compatible #-}
 module ShortIntroReflection where 
 
--- Assume we have Booleans and Natural numbers, with addition and
+-- Assume we have Booleans and natural numbers, with addition and
 -- boolean equality test defined.
 data Bool : Set where
   true : Bool
@@ -66,7 +65,7 @@ zero =? succ y = false
 succ x =? zero = false
 succ x =? succ y = x =? y
 
--- Equality, and equality is an equivalence relation, and a
+-- We define equality, which is an equivalence relation and a
 -- congruence.
 infix 6 _==_
 data _==_ {A : Set} (a : A) : A -> Set where
@@ -93,7 +92,7 @@ lemma-n+0 {(succ n)} with lemma-n+0 {n}
 ... | ih = cong succ ih
 
 -- Suppose now, given a term (n + zero) : ℕ, we want rewrite it to
--- (n). One way to do it manual is:
+-- (n). One way to do it manually is:
 
 --  n + 0 ≡< lemma-n+0 >
 --  n
@@ -101,9 +100,9 @@ lemma-n+0 {(succ n)} with lemma-n+0 {n}
 rewrite-manually : ∀ n -> succ (n + zero) == succ n
 rewrite-manually n = cong succ lemma-n+0
 
--- If we have == as the builtin equality, we can use rewrite
+-- If we have == as the builtin equality, we can use the rewrite
 -- keyword. But imagine that we are doing setoid reasoing, then we
--- dont have rewrite keyword anymore.
+-- don't have the rewrite keyword anymore.
 
 -- If we have many such rewritings, it would be too much trouble to do
 -- it manually. Another way is to translate it to, say, a string, and
@@ -120,8 +119,9 @@ data AST : Set where
   _:+_ : AST -> AST -> AST
   
 -- We parse expressions like x + y in as x :+ y and do rewriting on
--- it. Note we can not rewrite directly on "n + 0" since + is a
--- fuction, and "n + 0" is a number without using a AST. Let f be
+-- it. Note that we cannot rewrite directly on "n + 0", since + is a
+-- fuction, and "n + 0" is a number without using an AST. Let f be
+-- as follows:
 
 f : ℕ -> AST -> AST
 f n (Leaf m) = Leaf m
@@ -136,7 +136,7 @@ test-f : _==_ (f (succ zero) (Leaf zero :+ Leaf zero :+ Leaf (succ zero) :+ Leaf
               (Leaf zero :+ Leaf zero :+ Leaf (succ zero))
 test-f = refl
 
--- how should we parse expression to AST? At least we can do manual
+-- How should we parse an expression to an AST? At least we can do manual
 -- parsing for finitely many expressions..... For now, suppose we have
 -- the translations:
 
@@ -171,11 +171,11 @@ lemma-⟦⟧ n (Leaf x :+ a₁ :+ a₂) with lemma-⟦⟧ n (a₁ :+ a₂)
 lemma-⟦⟧ n ((a :+ a₂) :+ a₁) with lemma-⟦⟧ n (a :+ a₂) | lemma-⟦⟧ n a₁
 ... | ih1 | ih2 = cong2 _+_ ih1 ih2
 
--- But for (1), there seems no hope. Here comes the reflection to
--- rescue.
+-- But for (1), there seems no hope. Happily, reflection comes to the
+-- rescue!
 
 -- Using reflection, we can access (x + y)'s Agda-AST representation,
--- which is again is a term but like ((quote _+_) [quote x, quote y]
+-- which is again a term but like ((quote _+_) [quote x, quote y]
 -- ):
 
 open import Agda.Builtin.Reflection
@@ -190,20 +190,20 @@ eg-quote : quoteTerm (zero + zero) ==
       ∷ [])
 eg-quote = refl
 
--- The important thing is if we do unquote to Agda's AST, we sort of
--- get things back like:
+-- The important thing is that if we do unquote to Agda's AST,
+-- we sort of get things back like:
 
 -- unquote ( (quote _+_) [quote x, quote y] ) = x + y ....
 
 eg-unquote-refl : zero == zero
 eg-unquote-refl = unquote (\h -> unify h (quoteTerm (refl {a = zero})))
 
--- It do seem unquote cancels quoteTerm, but *****only***** in Agda's TC
--- monad. TC is short for TypeChecking. So we can only have (1) inside
--- TC monad. Luckily, one of the side-effect of TC is that it make
--- some holes satisfied when used properly. So we don't really need
--- get (1) out of TC, we just use it inside and use the side-effect to
--- make a hole satisfied.
+-- unquote does seem to cancel quoteTerm, but *****only***** in Agda's TC
+-- monad, whose name is an abbreviation of "TypeChecking". So we can only
+-- have (1) inside TC monad. Luckily, one of the side-effects of TC is
+-- that it does satisfy some holes when used properly. So we don't really
+-- need to get (1) out of TC; rather, we just use it inside and use the
+-- side-effect to make a hole satisfied.
 
 -- Let's see what's "unquote" doing under the hood:
 
@@ -216,17 +216,16 @@ refl0 h = unify h (quoteTerm (refl {ℕ} {zero}))
 eg-unquote' : zero == zero
 eg-unquote' = unquote refl0
 
--- We see what we "unquote" is "refl0", which is of type "Term -> TC
--- ⊤". We can only unquote things of such type.
+-- We see that what we "unquote" is "refl0", which is of type
+-- "Term -> TC ⊤". We can only unquote things of such type.
 
--- Here, "eg-unquote'" is wanting a value "refl", and more of less
--- refl0 "is" a quoted refl.... but, there is "unify" and "h" in the
--- way.
+-- Here, "eg-unquote'" is wanting a value "refl", and refl0 "is" more
+-- or less a quoted refl.... but "unify" and "h" are in the way.
 
 -- Actually, to unquote is to perform the computation "m : Term → TC
--- ⊤". (i.e. a TC monad computation with return type ⊤ parameterised
--- by Term). unquote will triggler the following sequence according to
--- agda manual:
+-- ⊤". (In other words, a TC monad computation with return type ⊤ parameterised
+-- by Term). unquote will trigger the following sequence according to
+-- the Agda manual:
 
 -- (1) Check if "m" is of type "Term → TC ⊤".
 
