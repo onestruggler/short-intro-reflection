@@ -44,8 +44,9 @@
 {-# OPTIONS --without-K --safe --cubical-compatible #-}
 module ShortIntroReflection where 
 
--- Assume we have Booleans and natural numbers, with addition and
--- boolean equality test defined.
+-- We begin by defining the Booleans and natural numbers, as well as
+-- some associated functions, e.g., addition and the equality check
+-- function.
 data Bool : Set where
   true : Bool
   false : Bool
@@ -66,8 +67,8 @@ zero =? succ y = false
 succ x =? zero = false
 succ x =? succ y = x =? y
 
--- We define equality, which is an equivalence relation and a
--- congruence.
+-- We *also* define equality, which is an equivalence relation and a
+-- congruence, as well as some more associated functions.
 infix 6 _==_
 data _==_ {A : Set} (a : A) : A -> Set where
   refl : a == a
