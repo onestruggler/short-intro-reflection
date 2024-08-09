@@ -102,7 +102,7 @@ rewrite-manually : ∀ n -> succ (n + zero) == succ n
 rewrite-manually n = cong succ lemma-n+0
 
 -- If we have == as the builtin equality, we can use the rewrite
--- keyword. But imagine that we are doing setoid reasoing, then we
+-- keyword. But if we are doing setoid reasoing, then we
 -- don't have the rewrite keyword anymore.
 
 -- If we have many such rewritings, it would be too much trouble to do
