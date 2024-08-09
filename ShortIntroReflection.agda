@@ -2,7 +2,7 @@
 
 -- This code is self contained and checked by Agda version 2.6.4.3
 
--- Suppose we have a term (program) "t", we can evaluate it to get say
+-- Suppose we have a term (program) "t". We can evaluate it to get say
 -- "t'", that is what we normally do about a term. We can also
 -- manipulate its syntactic expression "s", rewrite "s" to "s'"
 -- somehow, and then turn "s'" back to some program "t''" somehow. The
