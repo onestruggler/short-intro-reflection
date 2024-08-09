@@ -1,40 +1,41 @@
 -- A very short introduction to Agda's reflection mechanism.
 
--- This code is self contained and checked by Agda version 2.6.4.3
+-- This code is self contained and checked by Agda version 2.6.4.3.
 
--- Suppose we have a term (program) "t". We can evaluate it to get say
--- "t'", that is what we normally do about a term. We can also
+-- Suppose we have a term (program) "t". We can evaluate it to get, say,
+-- "t'", which is what we normally do about a term. We can also
 -- manipulate its syntactic expression "s", rewrite "s" to "s'"
--- somehow, and then turn "s'" back to some program "t''" somehow. The
+-- somehow, and then somehow turn "s'" back to some program "t''". The
 -- second way is called "reflection", since we manipulate "t" by
 -- reflecting on "t" using "s" and "s'" to get "t''".
 
 -- There are two kinds of reflection:
 
--- 1) The kind that are supported by Agda's builtin keywords (quote,
+-- 1) The kind that is supported by Agda's builtin keywords (quote,
 -- unquote ...), which reflects on an Agda term by manipulating its
--- Agda-AST representation. No parsing needed here, we can just quote
--- the term's to get Agda-AST.
+-- Agda-AST representation. No parsing is needed here, as we can just
+-- quote the terms to get the Agda-AST representation.
 
 -- 2) The kind that doesn't need keyword support, which reflects on an
 -- Agda term by manipulating a user-defined AST that is somehow
 -- "isomorphic" to the term's structure, i.e., captures the main
--- structure of the term. E.g. the structure of the term "x + y * z"
--- with x y z being variables, can be captured by a syntax tree. The
--- parsing from term to AST is by hand, i.e., we have to manually
+-- structure of the term. As an example, the structure of the term
+-- "x + y * z" with x y z being variables, can be captured by a syntax
+-- tree. The term-to-AST parsing is manual, i.e., we have to manually
 -- type "x :+ y :* z" to build the AST for the term.
 
--- Both share "reflection", i.e., manipulating the term (program) by
--- AST, and not excuting the term directly.
+-- Both share "reflection", i.e., manipulate the term (program) by
+-- AST and not do not directly execute the term.
 
 -- Both 1) and 2) are used in Agda programming. Combing two seems
--- good, and actually, many have done so -- a quick GitHub search for
+-- good, and, actually, many have done so -- a quick GitHub search for
 -- "agda reflection" should yield a couple of interesting repos.
 
--- By combining two, I mean, use 1) to get Agda-AST automatically, and
--- then translate Agda-AST to user-defined AST and then do the proof
--- under 2). This prevents 2)'s manually typing part. We will see that
--- there are complications in this combining.
+-- By combining two, I mean, use 1) to get Agda-AST automatically,
+-- translate that Agda-AST representation to a user-defined AST, and
+-- *then* do the proof under 2). This prevents 2)'s manual typing
+-- part. We will, however, see that there are complications in this
+-- combining.
 
 -- We only explain the first kind. For the second kind, there is a
 -- very short and nice explanation in Section 4 of:
