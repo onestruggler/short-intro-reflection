@@ -105,13 +105,13 @@ rewrite-manually n = cong succ lemma-n+0
 -- keyword. But if we are doing setoid reasoing, then we
 -- don't have the rewrite keyword anymore.
 
--- If we have many such rewritings, it would be too much trouble to do
--- it manually. Another way is to translate it to, say, a string, and
--- we write a program that search for "n + 0" and replace it with
--- "n". Then we tranlate the string back to terms, and somehow we
--- insert "lemma-n+0" at right place. We probably need some structure
--- that is better than string to support recording places where
--- "lemma-n+0" needed.
+-- If we have many such rewritings, then it would be too much trouble
+-- to do it manually. Another way is to translate it to, say, a
+-- string, and then write a program to replace "n + 0" with "n".
+-- We could then tranlate the string back to terms and somehow insert
+-- "lemma-n+0" at the right place. We would probably need some structure
+-- that is better than strings to support recording places where
+-- "lemma-n+0" is needed, though.
 
 -- So we use an AST such as
 infixr 8 _:+_
