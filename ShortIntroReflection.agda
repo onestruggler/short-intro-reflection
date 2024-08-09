@@ -102,14 +102,14 @@ lemma-n+0 {(succ n)} with lemma-n+0 {n}
 rewrite-manually : ∀ n -> succ (n + zero) == succ n
 rewrite-manually n = cong succ lemma-n+0
 
--- If we have == as the builtin equality, we can use the rewrite
--- keyword. But if we are doing setoid reasoing, then we
+-- If we have == as the builtin equality, then we can use the rewrite
+-- keyword. But if we are doing setoid reasoning, then we
 -- don't have the rewrite keyword anymore.
 
 -- If we have many such rewritings, then it would be too much trouble
 -- to do it manually. Another way is to translate it to, say, a
 -- string, and then write a program to replace "n + 0" with "n".
--- We could then tranlate the string back to terms and somehow insert
+-- We could then translate the string back to terms and somehow insert
 -- "lemma-n+0" at the right place. We would probably need some structure
 -- that is better than strings to support recording places where
 -- "lemma-n+0" is needed, though.
