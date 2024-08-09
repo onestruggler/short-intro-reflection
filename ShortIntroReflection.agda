@@ -200,7 +200,7 @@ eg-unquote-refl = unquote (\h -> unify h (quoteTerm (refl {a = zero})))
 
 -- unquote does seem to cancel quoteTerm, but *****only***** in Agda's TC
 -- monad, whose name is an abbreviation of "TypeChecking". So we can only
--- have (1) inside TC monad. Luckily, one of the side-effects of TC is
+-- have (1) within the TC monad. Luckily, one of the side-effects of TC is
 -- that it does satisfy some holes when used properly. So we don't really
 -- need to get (1) out of TC; rather, we just use it inside and use the
 -- side-effect to make a hole satisfied.
@@ -229,39 +229,39 @@ eg-unquote' = unquote refl0
 
 -- (1) Check if "m" is of type "Term → TC ⊤".
 
--- (2) Create a fresh hole at where the unquote clause is, we normally
--- know the type of the hole (because that is what we want to show. we
--- put unquote at where we put a proof term). A hole is also a
--- metavarible, say now Agda has "v : A" at disposal.
+-- (2) Create a fresh hole where the unquote clause is, we normally
+-- know the type of the hole, because that is what we want to show. we
+-- put unquote where we put a proof term. A hole is also a
+-- metavarible, so we say now that Agda has "v : A" at disposal.
 
 -- (3) Let "qv : Term" be the quoted representation of v, i.e., "qv =
 -- quote v".
 
 -- (4) Execute "m qv". Mainly excute "unify q v s". If qv and the
--- other quoted term "s" (e.g. "quoteTerm (refl {ℕ} {zero})") unifies,
--- then "s" is proof that fits in the hole, then Agda is satisfied.
+-- other quoted term "s" (e.g. "quoteTerm (refl {ℕ} {zero})") unify,
+-- then "s" is a proof that fits in the hole, and Agda is accordingly
+-- satisfied.
 
--- If you want, you can think of that, now Agda put the unquoted "s"
--- (unquote from AST to expresssion or string in editor we read) in
--- place, in the hole. But this thingking is just a mnemonic. After
--- all Agda can only understand AST. The gives a way to hint Agda when
--- Agda is doing typechecking.
+-- If you want, you can think that Agda replaces the hole with the
+-- unquoted "s", i.e., an editor's AST-unquoted expression or string.
+-- But this thinking is just a mnemonic. After all, Agda can only
+-- understand AST. The gives a way to hint Agda when Agda is doing
+-- typechecking.
 
 -- Is this reflection stuff still safe? Yes, it is. We didn't change
--- the typechecking algorithm at all, what we do is to only provide
--- extra inputs, extra infos to the algorithm.
+-- the typechecking algorithm at all; we only provide extra inputs and
+-- extra information for the algorithm.
 
--- Return to our problem: how to do automatically rewrting with having
--- equation (1) available only inside TC monad. First, we do the
--- promised translation from Agda-AST to our AST but where our AST is
--- also in quoted form (tis is the complication mentioned at the
--- begining).
+-- Return to our problem: How do we automatically rewrite when the
+-- equation is available only within the TC monad? First, we do the
+-- promised translation from Agda-AST to a *quoted* form of our AST.
+-- This quote stuff is the complication mentioned at the begining.
 
 -- commonly used argument info:
 pattern ai = arg-info visible (modality relevant quantity-ω)
 
--- Note that this function only works for expression of the form "x +
--- y + z". It translate the quoted "x + y + z" to quoted "x :+ y :+
+-- Note that this function only works for expressions of the form "x +
+-- y + z". It translates the quoted "x + y + z" to quoted "x :+ y :+
 -- z".
 myast-of : Term -> Term
 myast-of (con (quote zero) []) = con (quote Leaf) (arg ai (con (quote zero) []) ∷ [])
@@ -271,7 +271,7 @@ myast-of (con (quote succ) (arg i a ∷ [])) with myast-of a
 myast-of (def (quote _+_) (arg i1 a1 ∷ arg i2 a2 ∷ [])) = con (quote _:+_) (arg ai (myast-of a1) ∷ arg ai (myast-of a2) ∷ [])
 myast-of _ = unknown
 
--- Lets check it works as expected:
+-- Let's check that it works as expected:
 check1 : myast-of (quoteTerm ( zero + zero)) == quoteTerm (Leaf zero :+ Leaf zero)
 check1 = refl
 
@@ -279,8 +279,8 @@ check1 = refl
 
 -- ⟦_⟧ ∘ [_] = id (1), but here we have:
 
--- let [_] = unquote ∘ myast-of ∘ quoteTerm, we see by varing the
--- equation in check1, and by thinking of unquote as the inverse of
+-- defining [_] as unquote ∘ myast-of ∘ quoteTerm, we see by varying the
+-- equation in check1 and thinking of unquote as the inverse of
 -- quoteTerm (only true in TC) that:
 
 -- [ e ] = e' where e' is the corresponding term in our AST, i.e.,
@@ -288,11 +288,12 @@ check1 = refl
 
 -- [_] : arithmetic expression -> AST
 
--- Then we see (1) should follow, but without an agda proof.
+-- Then we see that (1) should follow... but without an Agda proof.
 
--- We want to automatically rewrites many n + 0 while keeping
--- equality, so we also need to be able to syntactically manipulate
--- equality. E.g., we can extract the quoted lhs from quoted equality:
+-- We want to automatically rewrite many n + 0 while keeping
+-- equality, so we need to also able to syntactically manipulate
+-- equality. As an example, we can extract the quoted lhs from quoted
+-- equality:
 
 lhs : Term -> Term
 lhs (def (quote _==_) ((arg i1 a1) ∷ (arg i2 a2) ∷ (arg i3 a3) ∷ [])) = a2 
