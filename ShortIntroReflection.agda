@@ -24,8 +24,8 @@
 -- tree. The term-to-AST parsing is manual, i.e., we have to manually
 -- type "x :+ y :* z" to build the AST for the term.
 
--- Both share "reflection", i.e., manipulate the term (program) by
--- AST and not do not directly execute the term.
+-- Both share "reflection", i.e., both manipulate the term (program)
+-- by AST and do not directly execute the term.
 
 -- Both 1) and 2) are used in Agda programming. Combing two seems
 -- good, and, actually, many have done so -- a quick GitHub search for
