@@ -286,7 +286,7 @@ check1 = refl
 -- [ e ] = e' where e' is the corresponding term in our AST, i.e.,
 -- such defined [ ] is indeed a translation:
 
--- [_] : arithmetic expression -> AST
+-- [_] : ArithmeticExpression -> AST
 
 -- Then we see that (1) should follow... but without an Agda proof.
 
