@@ -376,7 +376,7 @@ comp n hole =
       (bindTC 
         (bindTC
           (inferType hole)
-          (\h -> normalise h)
+          normalise
         )
         (\hole' -> returnTC (myast-of (lhs hole')))
       )
