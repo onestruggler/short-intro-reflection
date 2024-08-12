@@ -265,7 +265,7 @@ eg-unquote-refl : zero == zero
 eg-unquote-refl = unquote (\h -> unify h (quoteTerm (refl {a = zero})))
 \end{code}
 
-\AgdaKeyword{unquote} does seem to cancel \AgdaKeyword{quoteTerm}, but \superEmph{only} in Agda's \AgdaPostulate{TC} monad, whose name is an abbreviation of ``TypeChecking''. So we can only have (1) within the \AgdaPostulate{TC} monad. Luckily, one of the side-effects of \AgdaPostulate{TC} is that it does satisfy some holes when used properly. So we don't really need to get (1) out of \AgdaPostulate{TC}; rather, we just use it inside and use the side-effect to make a hole satisfied.
+\AgdaKeyword{unquote} does seem to cancel \AgdaKeyword{quoteTerm}, but \superEmph{only} in Agda's \AgdaPostulate{TC} monad.\footnote{The reader may or may not care to know that ``\AgdaPostulate{TC}'' is an abbreviation of ``TypeChecking''.} So we can only have (1) within the \AgdaPostulate{TC} monad. Luckily, one of the side-effects of \AgdaPostulate{TC} is that it does satisfy some holes when used properly. So we don't really need to get (1) out of \AgdaPostulate{TC}; rather, we just use it inside and use the side-effect to make a hole satisfied.
 
 Let's see what's \AgdaKeyword{unquote} doing under the hood:
 
