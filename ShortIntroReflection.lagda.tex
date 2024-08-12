@@ -99,15 +99,15 @@ data Bool : Set where
 \begin{code}
 data ℕ : Set where
   zero : ℕ
-  succ : ℕ -> ℕ
+  succ : ℕ → ℕ
 
 infixr 7 _+_
-_+_ : ℕ -> ℕ -> ℕ
+_+_ : ℕ → ℕ → ℕ
 zero + y = y
 succ x + y = succ (x + y)
 
 infix 6 _=?_
-_=?_ : ℕ -> ℕ -> Bool
+_=?_ : ℕ → ℕ → Bool
 zero =? zero = true
 zero =? succ y = false
 succ x =? zero = false
@@ -120,21 +120,21 @@ We \emph{also} define equality, which is an equivalence relation and a congruenc
 
 \begin{code}
 infix 6 _==_
-data _==_ {A : Set} (a : A) : A -> Set where
+data _==_ {A : Set} (a : A) : A → Set where
   refl : a == a
 
-sym : ∀ {A : Set} {a b : A} -> a == b -> b == a
+sym : ∀ {A : Set} {a b : A} → a == b → b == a
 sym refl = refl
 
-trans : ∀ {A : Set} {a b c : A} -> a == b -> b == c -> a == c
+trans : ∀ {A : Set} {a b c : A} → a == b → b == c → a == c
 trans refl refl = refl
 
-cong : ∀ {A B : Set} {a a' : A} ->
-       (f : A -> B) -> a == a' -> f a == f a'
+cong : ∀ {A B : Set} {a a' : A} →
+       (f : A → B) → a == a' → f a == f a'
 cong f refl = refl
 
-cong2 : ∀ {A B C : Set} {a a' : A} {b b' : B} ->
-        (f : A -> B -> C) -> a == a' -> b == b' -> f a b == f a' b'
+cong2 : ∀ {A B C : Set} {a a' : A} {b b' : B} →
+        (f : A → B → C) → a == a' → b == b' → f a b == f a' b'
 cong2 f refl refl = refl
 \end{code}
 
@@ -143,7 +143,7 @@ cong2 f refl refl = refl
 A lemma says \(n + 0 = 0\) for all \(n\).
 
 \begin{code}
-lemma-n+0 : ∀ {n : ℕ} -> n + zero == n
+lemma-n+0 : ∀ {n : ℕ} → n + zero == n
 lemma-n+0 {zero} = refl
 lemma-n+0 {(succ n)} with lemma-n+0 {n}
 ... | ih = cong succ ih
@@ -159,7 +159,7 @@ Suppose now, given a term \AgdaSymbol(\AgdaBound{n} \AgdaOperator{\AgdaInductive
 \end{code}
 
 \begin{code}
-rewrite-manually : ∀ n -> succ (n + zero) == succ n
+rewrite-manually : ∀ n → succ (n + zero) == succ n
 rewrite-manually n = cong succ lemma-n+0
 \end{code}
 
@@ -172,14 +172,14 @@ So we use an AST such as
 \begin{code}
 infixr 8 _:+_
 data AST : Set where
-  Leaf : ℕ -> AST
-  _:+_ : AST -> AST -> AST
+  Leaf : ℕ → AST
+  _:+_ : AST → AST → AST
 \end{code}
   
 We parse expressions like ``\AgdaString{x + y}'' in as \AgdaBound{x} \AgdaOperator{\AgdaInductiveConstructor{:+}} \AgdaBound{y} and do rewriting on it. Note that we cannot rewrite directly on \AgdaBound{n} \AgdaOperator{\AgdaFunction{+}} \AgdaInductiveConstructor{zero}, since \AgdaFunction{\AgdaUnderscore{}+\AgdaUnderscore{}} is a fuction, and \AgdaBound{n} \AgdaOperator{\AgdaFunction{+}} \AgdaInductiveConstructor{zero} is a number without using an AST. Let \AgdaFunction{f} be as follows:
 
 \begin{code}
-f : ℕ -> AST -> AST
+f : ℕ → AST → AST
 f n (Leaf m) = Leaf m
 f n t@(Leaf m :+ Leaf zero) with m =? n
 ... | true = Leaf m
@@ -200,14 +200,14 @@ parsing for finitely many expressions..... For now, suppose we have
 the translations:
 
 \begin{code}
--- [_] : arithmetic expression -> AST
--- ⟦_⟧ : AST -> arithemtic expression
+-- [_] : arithmetic expression → AST
+-- ⟦_⟧ : AST → arithemtic expression
 \end{code}
 
 AST to expression is easy:
 
 \begin{code}
-⟦_⟧ : AST -> ℕ
+⟦_⟧ : AST → ℕ
 ⟦ Leaf x ⟧ = x
 ⟦ x :+ x₁ ⟧ = ⟦ x ⟧ + ⟦ x₁ ⟧
 \end{code}
@@ -224,7 +224,7 @@ Then we see that \AgdaBound{e} equals \AgdaFunction{id} \AgdaBound{e}, which is 
 The last is an expression with all ``\AgdaString{n + zero}'' replaced by ``n''. Note that we can prove (2) by induction on the AST.
 
 \begin{code}
-lemma-⟦⟧ : ∀ n a ->  ⟦ a ⟧ == ⟦ f n a ⟧
+lemma-⟦⟧ : ∀ n a →  ⟦ a ⟧ == ⟦ f n a ⟧
 lemma-⟦⟧ n (Leaf x) = refl
 lemma-⟦⟧ n (Leaf x :+ Leaf zero) with x =? n
 ... | true = lemma-n+0
@@ -262,7 +262,7 @@ The important thing is that if we do unquote to Agda's AST, we sort of get thing
 
 \begin{code}
 eg-unquote-refl : zero == zero
-eg-unquote-refl = unquote (\h -> unify h (quoteTerm (refl {a = zero})))
+eg-unquote-refl = unquote (\h → unify h (quoteTerm (refl {a = zero})))
 \end{code}
 
 \AgdaKeyword{unquote} does seem to cancel \AgdaKeyword{quoteTerm}, but \superEmph{only} in Agda's \AgdaPostulate{TC} monad.\footnote{The reader may or may not care to know that ``\AgdaPostulate{TC}'' is an abbreviation of ``TypeChecking''.} So we can only have (1) within the \AgdaPostulate{TC} monad. Luckily, one of the side-effects of \AgdaPostulate{TC} is that it does satisfy some holes when used properly. So we don't really need to get (1) out of \AgdaPostulate{TC}; rather, we just use it inside and use the side-effect to make a hole satisfied.
@@ -280,7 +280,7 @@ eg-unquote' : zero == zero
 eg-unquote' = unquote refl0
 \end{code}
 
-We see that what we \AgdaKeyword{unquote} is \AgdaFunction{refl0}, which is of type \AgdaDatatype{Term} \AgdaSymbol{->} \AgdaPostulate{TC} \AgdaDatatype{⊤}. We can only unquote things of such type.
+We see that what we \AgdaKeyword{unquote} is \AgdaFunction{refl0}, which is of type \AgdaDatatype{Term} \AgdaSymbol{→} \AgdaPostulate{TC} \AgdaDatatype{⊤}. We can only unquote things of such type.
 
 Here, \AgdaFunction{eg-unquote'} is wanting a value \AgdaInductiveConstructor{refl}, and \AgdaFunction{refl0} \emph{is} more or less a quoted \AgdaInductiveConstructor{refl}\ldots{} but \AgdaKeyword{unify} and \AgdaBound{h} are in the way.
 
@@ -307,7 +307,7 @@ pattern ai = arg-info visible (modality relevant quantity-ω)
 Note that this function only works for expressions of the form \AgdaBound{x} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{y} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{z}. It translates the quoted \AgdaBound{x} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{y} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{z} to quoted \AgdaBound{x} \AgdaOperator{\AgdaInductiveConstructor{:+}} \AgdaBound{y} \AgdaOperator{\AgdaInductiveConstructor{:+}} \AgdaBound{z}.
 
 \begin{code}
-myast-of : Term -> Term
+myast-of : Term → Term
 myast-of (con (quote zero) []) = con (quote Leaf) (arg ai (con (quote zero) []) ∷ [])
 myast-of (con (quote succ) (arg i a ∷ [])) with myast-of a
 ... | con (quote Leaf) args = con (quote Leaf) (arg ai (con (quote succ) args) ∷ [])
@@ -336,7 +336,7 @@ Note that check1 is a weaker form of equation (1): recall
 -- [ e ] = e' where e' is the corresponding term in our AST, i.e.,
 -- such defined [ ] is indeed a translation:
 
--- [_] : ArithmeticExpression -> AST
+-- [_] : ArithmeticExpression → AST
 \end{code}
 
 Then we see that (1) should follow, but we currently lack an Agda proof.
@@ -344,7 +344,7 @@ Then we see that (1) should follow, but we currently lack an Agda proof.
 We want to automatically rewrite many \AgdaBound{n} \AgdaOperator{\AgdaFunction{+}} \AgdaInductiveConstructor{zero} while keeping equality, so we need to also able to syntactically manipulate equality. As an example, we can extract the quoted \AgdaFunction{lhs} from quoted equality:
 
 \begin{code}
-lhs : Term -> Term
+lhs : Term → Term
 lhs (def (quote _==_) ((arg i1 a1) ∷ (arg i2 a2) ∷ (arg i3 a3) ∷ [])) = a2 
 lhs t = unknown
 \end{code}
@@ -352,7 +352,7 @@ lhs t = unknown
 And we have quoted proof of \AgdaOperator{\AgdaFunction{⟦}} \AgdaFunction{lhs} \AgdaOperator{\AgdaFunction{⟧}} \AgdaOperator{\AgdaDatatype{==}} \AgdaOperator{\AgdaFunction{⟦}} \AgdaBound{f} \AgdaBound{n} \AgdaFunction{lhs} \AgdaOperator{\AgdaFunction{⟧}}, i.e., proof of correctness of the rewriting "\AgdaString{f n}" in quoted form. (with all arguments in quoted form).  % What is f?  % Baby, don't hurt me...
 
 \begin{code}
-q'⟦⟧ : Term -> Term → Term
+q'⟦⟧ : Term → Term → Term
 q'⟦⟧ n lhs = def (quote lemma-⟦⟧) (arg ai n ∷ arg ai lhs ∷ [])
 \end{code}
 
@@ -366,7 +366,7 @@ A parameterised \AgdaPostulate{TC} computation that try to unify hole with provi
 \end{enumerate}
 
 \begin{code}
-comp : Term -> Term -> TC ⊤
+comp : Term → Term → TC ⊤
 comp n hole =
   bindTC
     (bindTC
@@ -375,11 +375,11 @@ comp n hole =
           (inferType hole)
           normalise
         )
-        (\hole' -> returnTC (myast-of (lhs hole')))
+        (\hole' → returnTC (myast-of (lhs hole')))
       )
-      (\l' ->  returnTC (q'⟦⟧ n l'))
+      (\l' →  returnTC (q'⟦⟧ n l'))
     )
-    ( \sol -> unify hole sol )
+    ( \sol → unify hole sol )
   -- note that if you "unify hole hole", unquote (comp n) will give
   -- you yellow backgroud meaning unsolved metavariable i.e., unsolved
   -- hole.
@@ -396,7 +396,7 @@ We can use macro to hide unquote and quoteTerm.
 
 \begin{code}
 macro
-  comp' : Term -> Term -> TC ⊤
+  comp' : Term → Term → TC ⊤
   comp' = comp
 
 finally2 : (succ zero + zero) + (succ zero + zero) == succ zero + succ zero
