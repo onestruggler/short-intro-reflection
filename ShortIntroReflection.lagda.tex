@@ -219,7 +219,7 @@ If we have properties about them:
 -- ⟦_⟧ ∘ f = ⟦_⟧      (2)
 \end{code}
 
-Then we see that \AgdaBound{e} is equal to \AgdaFunction{id} \AgdaBound{e}, which is equal to \AgdaFunction{⟦\AgdaUnderscore{}⟧} \AgdaOperator{\AgdaFunction{∘}} \AgdaFunction{[\AgdaUnderscore{}]} \AgdaBound{e}, which is equal to \AgdaFunction{⟦\AgdaUnderscore{}⟧} \AgdaOperator{\AgdaFunction{∘}} \AgdaBound{f} \AgdaOperator{\AgdaFunction{∘}} \AgdaFunction{[\AgdaUnderscore{}]} \AgdaBound{e}.
+Then we see that \AgdaBound{e} equals \AgdaFunction{id} \AgdaBound{e}, which is equal to \AgdaSymbol(\AgdaFunction{⟦\AgdaUnderscore{}⟧} \AgdaOperator{\AgdaFunction{∘}} \AgdaFunction{[\AgdaUnderscore{}]}\AgdaSymbol) \AgdaBound{e}, which is equal to \AgdaSymbol(\AgdaFunction{⟦\AgdaUnderscore{}⟧} \AgdaOperator{\AgdaFunction{∘}} \AgdaBound{f} \AgdaOperator{\AgdaFunction{∘}} \AgdaFunction{[\AgdaUnderscore{}]}\AgdaSymbol) \AgdaBound{e}.
 
 The last is an expression with all ``\AgdaString{n + zero}'' replaced by ``n''. Note that we can prove (2) by induction on the AST.
 
