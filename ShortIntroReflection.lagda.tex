@@ -165,8 +165,7 @@ rewrite-manually n = cong succ lemma-n+0
 
 If we have \AgdaFunction{\AgdaUnderscore{}==\AgdaUnderscore{}} as the builtin equality, then we can use the ``\AgdaKeyword{rewrite}'' keyword. But if we are doing setoid reasoning, then we don't have the ``\AgdaKeyword{rewrite}'' keyword anymore.
 
-If we have many such rewritings, then it would be too much trouble to do it manually. Another way is to translate it to, say, a string, and then write a program to replace "\AgdaString{n + 0}" with "\AgdaString{n}". We could then translate the string back to terms and somehow insert
-"\AgdaString{lemma-n+0}" at the right place. We would probably need some structure that is better than strings to support recording places where "\AgdaString{lemma-n+0}" is needed, though.
+Manually doing many of these rewritings would be incredibly tedious, so we should really look for a different method. Another way is to translate an expression to, say, a string, and then write a program to replace "\AgdaString{n + 0}" with "\AgdaString{n}". We could then translate the string back to terms and somehow insert "\AgdaString{lemma-n+0}" at the right place. We would probably need some structure that is better than strings to support recording places where "\AgdaString{lemma-n+0}" is needed, though.
 
 So we use an AST such as
 
