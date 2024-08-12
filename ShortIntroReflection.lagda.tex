@@ -1,0 +1,404 @@
+\documentclass{article}
+
+\usepackage{newunicodechar}
+\usepackage{geometry}%[margin=1.25in]
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{parskip}
+\usepackage{hyperref}
+% The coloring distracts the joker who converted this thing to a literate Agda file.
+% This joker should not be confused with the author, who is perfectly free to remove "[bw]".
+\usepackage[bw]{agda}
+\usepackage{unicode-math}
+
+\newunicodechar{⊤}{\ensuremath{\mathnormal{\top}}}
+\newunicodechar{⊥}{\ensuremath{\mathnormal{\bot}}}
+\newunicodechar{∀}{\ensuremath{\mathnormal{\forall}}}
+\newunicodechar{ℕ}{\ensuremath{\mathnormal{\mathbb{N}}}}
+\newunicodechar{₁}{\ensuremath{\mathnormal{_1}}}
+\newunicodechar{₂}{\ensuremath{\mathnormal{_2}}}
+\newunicodechar{≅}{\ensuremath{\mathnormal{\cong}}}
+\newunicodechar{ε}{\ensuremath{\mathnormal{\epsilon}}}
+\newunicodechar{ω}{\ensuremath{\mathnormal{\omega}}}
+\newunicodechar{λ}{\ensuremath{\mathnormal{\lambda}}}
+\newunicodechar{ℚ}{\ensuremath{\mathnormal{\mathbb{Q}}}}
+\newunicodechar{ℤ}{\ensuremath{\mathnormal{\mathbb{Z}}}}
+\newunicodechar{∷}{\ensuremath{\mathnormal{\Colon}}}
+\newunicodechar{⊎}{\ensuremath{\mathnormal{\uplus}}}
+\newunicodechar{≈}{\ensuremath{\mathnormal{\approx}}}
+\newunicodechar{≉}{\ensuremath{\mathnormal{\napprox}}}
+\newunicodechar{≡}{\ensuremath{\mathnormal{\equiv}}}
+\newunicodechar{≢}{\ensuremath{\mathnormal{\nequiv}}}
+\newunicodechar{≤}{\ensuremath{\mathnormal{\leq}}}
+\newunicodechar{⊔}{\ensuremath{\mathnormal{\sqcup}}}
+\newunicodechar{≟}{\ensuremath{\mathnormal{\stackrel{?}{=}}}}
+\newunicodechar{∘}{\ensuremath{\mathnormal{\circ}}}
+\newunicodechar{∧}{\ensuremath{\mathnormal{\land}}}
+\newunicodechar{∧}{\ensuremath{\mathnormal{\land}}}
+\newunicodechar{⇒}{\ensuremath{\mathnormal{\Rightarrow}}}
+\newunicodechar{⟨}{\ensuremath{\mathnormal{\langle}}}
+\newunicodechar{⟩}{\ensuremath{\mathnormal{\rangle}}}
+\newunicodechar{∎}{\ensuremath{\mathnormal{\blacksquare}}}
+\newunicodechar{∈}{\ensuremath{\mathnormal{\in}}}
+\newunicodechar{∉}{\ensuremath{\mathnormal{\notin}}}
+\newunicodechar{⊂}{\ensuremath{\mathnormal{\subset}}}
+\newunicodechar{⊆}{\ensuremath{\mathnormal{\subseteq}}}
+\newunicodechar{∩}{\ensuremath{\mathnormal{\cap}}}
+\newunicodechar{⋂}{\ensuremath{\mathnormal{\bigcap}}}
+\newunicodechar{∪}{\ensuremath{\mathnormal{\cup}}}
+\newunicodechar{ᵇ}{\ensuremath{\mathnormal{^\AgdaFontStyle{b}}}}
+\newunicodechar{∣}{\ensuremath{\mathnormal{\lvert}}}
+
+% The "superEmph" command is used for some real, serious emphasis... or just standard emphasis.  :-)
+\newcommand{\superEmph}{\emph}
+
+\title{A Very Short Introduction to Agda's Reflection Mechanism}
+\author{onestruggler}
+
+\begin{document}
+\maketitle{}
+
+This code is self contained and checked by Agda version 2.6.4.3.
+
+\section{Introduction}
+Suppose we have a term (program) \(t\). We can evaluate it to get, say, \(t'\), which is what we normally do about a term. We can also manipulate its syntactic expression \(s\), rewrite \(s\) to \(s'\) somehow, and then somehow turn \(s'\) back to some program \(t''\). The second way is called ``reflection'', since we manipulate \(t\) by reflecting on \(t\) using \(s\) and \(s'\) to get \(t''\).
+
+There are two kinds of reflection:
+
+\begin{enumerate}
+  \item The kind that is supported by Agda's builtin keywords (``\AgdaKeyword{quote}'', ``\AgdaKeyword{unquote}'', \ldots{}), which reflects on an Agda term by manipulating its Agda-AST representation. No parsing is needed here, as we can just quote the terms to get the Agda-AST representation.
+  \item The kind that doesn't need keyword support, which reflects on an Agda term by manipulating a user-defined AST that is somehow "isomorphic" to the term's structure, i.e., captures the main structure of the term. As an example, the structure of the term \AgdaBound{x} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{y} \AgdaOperator{\AgdaFunction{*}} \AgdaBound{z}" with \AgdaBound{x} \AgdaBound{y} \AgdaBound{z} being variables, can be captured by a syntax tree. The term-to-AST parsing is manual, i.e., we have to manually type ``\AgdaBound{x} \AgdaOperator{\AgdaInductiveConstructor{:+}} \AgdaBound{y} \AgdaOperator{\AgdaInductiveConstructor{:*}} \AgdaBound{z}'' to build the AST for the term.
+\end{enumerate}
+
+Both share ``reflection'', i.e., both manipulate the term (program) by AST and do not directly execute the term.
+
+Both 1) and 2) are used in Agda programming. Combing two seems good, and, actually, many have done so --- a quick GitHub search for ``agda reflection'' should yield a couple of interesting repos.
+
+By combining two, I mean, use 1) to get Agda-AST automatically, translate that Agda-AST representation to a user-defined AST, and \emph{then} do the proof under 2). This prevents 2)'s manual typing part. We will, however, see that there are complications in this combining.
+
+We only explain the first kind. For the second kind, there is a very short and nice explanation in Section 4 of: \url{https://wiki.portal.chalmers.se/agda/pmwiki.php?n=Main.Documentation?action=download&upname=AgdaOverview2009.pdf}
+
+\begin{code}
+{-# OPTIONS --without-K --safe --cubical-compatible #-}
+module ShortIntroReflection where 
+\end{code}
+
+\section{Basic Types and Associated Functions}
+We begin by defining the Booleans and natural numbers, as well as some associated functions, e.g., addition and the equality check function.
+
+\subsection{The Boolean Type}
+
+\begin{code}
+data Bool : Set where
+  true : Bool
+  false : Bool
+\end{code}
+
+\subsection{The Natural Number Type}
+
+\begin{code}
+data ℕ : Set where
+  zero : ℕ
+  succ : ℕ -> ℕ
+
+infixr 7 _+_
+_+_ : ℕ -> ℕ -> ℕ
+zero + y = y
+succ x + y = succ (x + y)
+
+infix 6 _=?_
+_=?_ : ℕ -> ℕ -> Bool
+zero =? zero = true
+zero =? succ y = false
+succ x =? zero = false
+succ x =? succ y = x =? y
+\end{code}
+
+\subsection{Equality}
+
+We \emph{also} define equality, which is an equivalence relation and a congruence, as well as some more associated functions.
+
+\begin{code}
+infix 6 _==_
+data _==_ {A : Set} (a : A) : A -> Set where
+  refl : a == a
+
+sym : ∀ {A : Set} {a b : A} -> a == b -> b == a
+sym refl = refl
+
+trans : ∀ {A : Set} {a b c : A} -> a == b -> b == c -> a == c
+trans refl refl = refl
+
+cong : ∀ {A B : Set} {a a' : A} ->
+       (f : A -> B) -> a == a' -> f a == f a'
+cong f refl = refl
+
+cong2 : ∀ {A B C : Set} {a a' : A} {b b' : B} ->
+        (f : A -> B -> C) -> a == a' -> b == b' -> f a b == f a' b'
+cong2 f refl refl = refl
+\end{code}
+
+\subsection{Example of Application}
+
+A lemma says \(n + 0 = 0\) for all \(n\).
+
+\begin{code}
+lemma-n+0 : ∀ {n : ℕ} -> n + zero == n
+lemma-n+0 {zero} = refl
+lemma-n+0 {(succ n)} with lemma-n+0 {n}
+... | ih = cong succ ih
+\end{code}
+
+\section{Rewriting}
+
+Suppose now, given a term \AgdaSymbol(\AgdaBound{n} \AgdaOperator{\AgdaInductiveConstructor{+}} \AgdaInductiveConstructor{zero}\AgdaSymbol) \AgdaSymbol: \AgdaDatatype{ℕ}, we want rewrite it to \AgdaSymbol(\AgdaBound{n}\AgdaSymbol). One way to do it manually is:
+
+\begin{code}
+--  n + 0 ≡< lemma-n+0 >
+--  n
+\end{code}
+
+\begin{code}
+rewrite-manually : ∀ n -> succ (n + zero) == succ n
+rewrite-manually n = cong succ lemma-n+0
+\end{code}
+
+If we have \AgdaFunction{\AgdaUnderscore{}==\AgdaUnderscore{}} as the builtin equality, then we can use the ``\AgdaKeyword{rewrite}'' keyword. But if we are doing setoid reasoning, then we don't have the ``\AgdaKeyword{rewrite}'' keyword anymore.
+
+If we have many such rewritings, then it would be too much trouble to do it manually. Another way is to translate it to, say, a string, and then write a program to replace "\AgdaString{n + 0}" with "\AgdaString{n}". We could then translate the string back to terms and somehow insert
+"\AgdaString{lemma-n+0}" at the right place. We would probably need some structure that is better than strings to support recording places where "\AgdaString{lemma-n+0}" is needed, though.
+
+So we use an AST such as
+
+\begin{code}
+infixr 8 _:+_
+data AST : Set where
+  Leaf : ℕ -> AST
+  _:+_ : AST -> AST -> AST
+\end{code}
+  
+We parse expressions like ``\AgdaString{x + y}'' in as \AgdaBound{x} \AgdaOperator{\AgdaInductiveConstructor{:+}} \AgdaBound{y} and do rewriting on it. Note that we cannot rewrite directly on \AgdaBound{n} \AgdaOperator{\AgdaFunction{+}} \AgdaInductiveConstructor{zero}, since \AgdaFunction{\AgdaUnderscore{}+\AgdaUnderscore{}} is a fuction, and \AgdaBound{n} \AgdaOperator{\AgdaFunction{+}} \AgdaInductiveConstructor{zero} is a number without using an AST. Let \AgdaFunction{f} be as follows:
+
+\begin{code}
+f : ℕ -> AST -> AST
+f n (Leaf m) = Leaf m
+f n t@(Leaf m :+ Leaf zero) with m =? n
+... | true = Leaf m
+... | false = t
+f n (l :+ r) = f n l :+ f n r
+\end{code}
+
+So \AgdaFunction{f} \AgdaBound{n} rewrites all \AgdaInductiveConstructor{Leaf} \AgdaBound{n} \AgdaOperator{\AgdaInductiveConstructor{:+}} \AgdaInductiveConstructor{Leaf} \AgdaInductiveConstructor{zero} to \AgdaInductiveConstructor{Leaf} \AgdaBound{n}.
+
+\begin{code}
+test-f : _==_ (f (succ zero) (Leaf zero :+ Leaf zero :+ Leaf (succ zero) :+ Leaf zero))
+              (Leaf zero :+ Leaf zero :+ Leaf (succ zero))
+test-f = refl
+\end{code}
+
+How should we parse an expression to an AST? At least we can do manual
+parsing for finitely many expressions..... For now, suppose we have
+the translations:
+
+\begin{code}
+-- [_] : arithmetic expression -> AST
+-- ⟦_⟧ : AST -> arithemtic expression
+\end{code}
+
+AST to expression is easy:
+
+\begin{code}
+⟦_⟧ : AST -> ℕ
+⟦ Leaf x ⟧ = x
+⟦ x :+ x₁ ⟧ = ⟦ x ⟧ + ⟦ x₁ ⟧
+\end{code}
+
+If we have properties about them:
+
+\begin{code}
+-- ⟦_⟧ ∘ [_] = id     (1)
+-- ⟦_⟧ ∘ f = ⟦_⟧      (2)
+\end{code}
+
+Then
+
+\begin{code}
+-- e = id e = ⟦_⟧ ∘ [_] e = ⟦_⟧ ∘ f ∘ [_] e
+\end{code}
+
+The last is an expression with all ``\AgdaString{n + zero}'' replace by ``n''. Note that we can prove (2) by induction on the AST.
+
+\begin{code}
+lemma-⟦⟧ : ∀ n a ->  ⟦ a ⟧ == ⟦ f n a ⟧
+lemma-⟦⟧ n (Leaf x) = refl
+lemma-⟦⟧ n (Leaf x :+ Leaf zero) with x =? n
+... | true = lemma-n+0
+... | false = refl
+lemma-⟦⟧ n (Leaf x :+ Leaf (succ x₁)) = refl
+lemma-⟦⟧ n (Leaf x :+ a₁ :+ a₂) with lemma-⟦⟧ n (a₁ :+ a₂)
+... | ih = cong (x +_) ih
+lemma-⟦⟧ n ((a :+ a₂) :+ a₁) with lemma-⟦⟧ n (a :+ a₂) | lemma-⟦⟧ n a₁
+... | ih1 | ih2 = cong2 _+_ ih1 ih2
+\end{code}
+
+But for (1), there seems no hope. Happily, reflection comes to the rescue!
+
+Using reflection, we can access \AgdaSymbol(\AgdaBound{x} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{y}\AgdaSymbol)'s Agda-AST representation, which is again a term but like \AgdaSymbol(\AgdaSymbol(\AgdaKeyword{quote} \AgdaFunction{\AgdaUnderscore{}+\AgdaUnderscore{}}\AgdaSymbol) \AgdaOperator{\AgdaFunction{[}} \AgdaKeyword{quote} \AgdaBound{x} \AgdaOperator{\AgdaInductiveConstructor{,}} \AgdaKeyword{quote} \AgdaBound{y} \AgdaOperator{\AgdaFunction{]}}\AgdaSymbol):
+
+\begin{code}
+open import Agda.Builtin.Reflection
+open import Agda.Builtin.List
+
+-- We use quoteTerm to get the Agda-AST of an expression.
+eg-quote : quoteTerm (zero + zero) ==
+  def (quote _+_)
+      ( let modalityω = modality relevant quantity-ω in
+        arg (arg-info visible modalityω) (con (quote zero) [])
+      ∷ arg (arg-info visible modalityω) (con (quote zero) [])
+      ∷ [])
+eg-quote = refl
+\end{code}
+
+The important thing is that if we do unquote to Agda's AST, we sort of get things back like:
+
+\begin{code}
+-- unquote ( (quote _+_) [quote x, quote y] ) = x + y ....
+\end{code}
+
+\begin{code}
+eg-unquote-refl : zero == zero
+eg-unquote-refl = unquote (\h -> unify h (quoteTerm (refl {a = zero})))
+\end{code}
+
+\AgdaKeyword{unquote} does seem to cancel \AgdaKeyword{quoteTerm}, but \superEmph{only} in Agda's \AgdaPostulate{TC} monad, whose name is an abbreviation of ``TypeChecking''. So we can only have (1) within the \AgdaPostulate{TC} monad. Luckily, one of the side-effects of \AgdaPostulate{TC} is that it does satisfy some holes when used properly. So we don't really need to get (1) out of \AgdaPostulate{TC}; rather, we just use it inside and use the side-effect to make a hole satisfied.
+
+Let's see what's \AgdaKeyword{unquote} doing under the hood:
+
+\begin{code}
+open import Agda.Builtin.Unit
+
+-- Break "eg-unquote-refl" into two parts:
+refl0 : Term → TC ⊤
+refl0 h = unify h (quoteTerm (refl {ℕ} {zero}))
+
+eg-unquote' : zero == zero
+eg-unquote' = unquote refl0
+\end{code}
+
+We see that what we \AgdaKeyword{unquote} is \AgdaFunction{refl0}, which is of type \AgdaDatatype{Term} \AgdaSymbol{->} \AgdaPostulate{TC} \AgdaDatatype{⊤}. We can only unquote things of such type.
+
+Here, \AgdaFunction{eg-unquote'} is wanting a value \AgdaInductiveConstructor{refl}, and \AgdaFunction{refl0} \emph{is} more or less a quoted \AgdaInductiveConstructor{refl}\ldots{} but \AgdaKeyword{unify} and \AgdaBound{h} are in the way.
+
+Actually, to \AgdaKeyword{unquote} is to perform the computation \AgdaFunction{m} \AgdaSymbol{:} \AgdaDatatype{Term} \AgdaSymbol{→} \AgdaPostulate{TC} \AgdaDatatype{⊤}. (In other words, a \AgdaPostulate{TC} monad computation with return type \AgdaDatatype{⊤} parameterised by \AgdaDatatype{Term}). \AgdaKeyword{unquote} will trigger the following sequence according to the Agda manual:
+
+\begin{enumerate}
+  \item Check if \AgdaBound{m} is of type \AgdaDatatype{Term} \AgdaSymbol{→} \AgdaPostulate{TC} \AgdaDatatype{⊤}.
+  \item Create a fresh hole where the \AgdaKeyword{unquote} clause is, we normally know the type of the hole, because that is what we want to show. we put \AgdaKeyword{unquote} where we put a proof term. A hole is also a metavarible, so we say now that Agda has \AgdaBound{v} \AgdaSymbol{:} \AgdaBound{A} at disposal.
+  \item Let \AgdaFunction{qv} \AgdaSymbol{:} \AgdaDatatype{Term} be the quoted representation of \AgdaBound{v}, i.e., ``\AgdaFunction{qv} \AgdaSymbol{=} \AgdaKeyword{quote} \AgdaBound{v}''.
+  \item Execute \AgdaBound{m} \AgdaFunction{qv}. Mainly excute \AgdaKeyword{unify} \AgdaBound{q} \AgdaBound{v} \AgdaBound{s}. If \AgdaFunction{qv} and the other quoted term \AgdaBound{s} (e.g. \AgdaKeyword{quoteTerm} \AgdaSymbol(\AgdaInductiveConstructor{refl} \AgdaSymbol\{\AgdaFunction{ℕ}\AgdaSymbol\} \AgdaSymbol\{\AgdaInductiveConstructor{zero}\AgdaSymbol\}\AgdaSymbol)) unify, then \AgdaBound{s} is a proof that fits in the hole, and Agda is accordingly satisfied.
+\end{enumerate}
+
+If you want, you can think that Agda replaces the hole with the unquoted \AgdaBound{s}, i.e., an editor's AST-unquoted expression or string. But this thinking is just a mnemonic. After all, Agda can only understand AST. The gives a way to hint Agda when Agda is doing typechecking.
+
+Is this reflection stuff still safe? Yes, it is. We didn't change the typechecking algorithm at all; we only provide extra inputs and extra information for the algorithm.
+
+Return to our problem: How do we automatically rewrite when the equation is available only within the \AgdaPostulate{TC} monad? First, we do the promised translation from Agda-AST to a \emph{quoted} form of our AST. This quote stuff is the complication mentioned at the begining.
+
+\begin{code}
+-- commonly used argument info:
+pattern ai = arg-info visible (modality relevant quantity-ω)
+\end{code}
+
+Note that this function only works for expressions of the form \AgdaBound{x} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{y} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{z}. It translates the quoted \AgdaBound{x} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{y} \AgdaOperator{\AgdaFunction{+}} \AgdaBound{z} to quoted \AgdaBound{x} \AgdaOperator{\AgdaInductiveConstructor{:+}} \AgdaBound{y} \AgdaOperator{\AgdaInductiveConstructor{:+}} \AgdaBound{z}.
+
+\begin{code}
+myast-of : Term -> Term
+myast-of (con (quote zero) []) = con (quote Leaf) (arg ai (con (quote zero) []) ∷ [])
+myast-of (con (quote succ) (arg i a ∷ [])) with myast-of a
+... | con (quote Leaf) args = con (quote Leaf) (arg ai (con (quote succ) args) ∷ [])
+... | _ = unknown
+myast-of (def (quote _+_) (arg i1 a1 ∷ arg i2 a2 ∷ [])) = con (quote _:+_) (arg ai (myast-of a1) ∷ arg ai (myast-of a2) ∷ [])
+myast-of _ = unknown
+\end{code}
+
+Let's check that it works as expected:
+
+\begin{code}
+check1 : myast-of (quoteTerm ( zero + zero)) == quoteTerm (Leaf zero :+ Leaf zero)
+check1 = refl
+\end{code}
+
+Note that check1 is a weaker form of equation (1): recall
+
+\begin{code}
+-- ⟦_⟧ ∘ [_] = id (1), but here we have:
+
+-- defining [_] as unquote ∘ myast-of ∘ quoteTerm, we see by varying the
+-- equation in check1 and thinking of unquote as the inverse of
+-- quoteTerm (only true in TC) that:
+
+-- [ e ] = e' where e' is the corresponding term in our AST, i.e.,
+-- such defined [ ] is indeed a translation:
+
+-- [_] : ArithmeticExpression -> AST
+\end{code}
+
+Then we see that (1) should follow\ldots{} but without an Agda proof.
+
+We want to automatically rewrite many \AgdaBound{n} \AgdaOperator{\AgdaFunction{+}} \AgdaInductiveConstructor{zero} while keeping equality, so we need to also able to syntactically manipulate equality. As an example, we can extract the quoted \AgdaFunction{lhs} from quoted equality:
+
+\begin{code}
+lhs : Term -> Term
+lhs (def (quote _==_) ((arg i1 a1) ∷ (arg i2 a2) ∷ (arg i3 a3) ∷ [])) = a2 
+lhs t = unknown
+\end{code}
+
+And we have quoted proof of \AgdaOperator{\AgdaFunction{⟦}} \AgdaFunction{lhs} \AgdaOperator{\AgdaFunction{⟧}} \AgdaOperator{\AgdaDatatype{==}} \AgdaOperator{\AgdaFunction{⟦}} \AgdaBound{f} \AgdaBound{n} \AgdaFunction{lhs} \AgdaOperator{\AgdaFunction{⟧}}, i.e., proof of correctness of the rewriting "\AgdaString{f n}" in quoted form. (with all arguments in quoted form).  % What is f?  % Baby, don't hurt me...
+
+\begin{code}
+q'⟦⟧ : Term -> Term → Term
+q'⟦⟧ n lhs = def (quote lemma-⟦⟧) (arg ai n ∷ arg ai lhs ∷ [])
+\end{code}
+
+A parameterised \AgdaPostulate{TC} computation that try to unify hole with provide solution. We only use agda buitins, so it's a little mess. Using do-notation will be cleaner. But still easy to see what's there: normalize the type of the hole >>= take out \AgdaFunction{lhs} >>= using \AgdaFunction{q'⟦⟧} on lhs to generate a proof sol >>= unify hole and sol.
+
+\begin{code}
+comp : Term -> Term -> TC ⊤
+comp n hole =
+  bindTC
+    (bindTC
+      (bindTC 
+        (bindTC
+          (inferType hole)
+          (\h -> normalise h)
+        )
+        (\hole' -> returnTC (myast-of (lhs hole')))
+      )
+      (\l' ->  returnTC (q'⟦⟧ n l'))
+    )
+    ( \sol -> unify hole sol )
+  -- note that if you "unify hole hole", unquote (comp n) will give
+  -- you yellow backgroud meaning unsolved metavariable i.e., unsolved
+  -- hole.
+\end{code}
+
+Finally,
+
+\begin{code}
+finally1 : (succ zero + zero) + (succ zero + zero) == succ zero + succ zero
+finally1 = unquote (comp (quoteTerm (succ zero)))
+\end{code}
+
+We can use macro to hide unquote and quoteTerm.
+
+\begin{code}
+macro
+  comp' : Term -> Term -> TC ⊤
+  comp' = comp
+
+finally2 : (succ zero + zero) + (succ zero + zero) == succ zero + succ zero
+finally2 = comp' (succ zero)
+\end{code}
+
+Done! Thanks for reading.
+\end{document}
