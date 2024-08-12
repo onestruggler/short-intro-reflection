@@ -379,7 +379,7 @@ comp n hole =
       )
       (\l' →  returnTC (q'⟦⟧ n l'))
     )
-    ( \sol → unify hole sol )
+    (\sol → unify hole sol)
   -- note that if you "unify hole hole", unquote (comp n) will give
   -- you yellow backgroud meaning unsolved metavariable i.e., unsolved
   -- hole.
