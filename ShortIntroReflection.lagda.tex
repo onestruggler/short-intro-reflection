@@ -316,7 +316,8 @@ myast-of (con (quote zero) []) = con (quote Leaf) (arg ai (con (quote zero) []) 
 myast-of (con (quote succ) (arg i a ∷ [])) with myast-of a
 ... | con (quote Leaf) args = con (quote Leaf) (arg ai (con (quote succ) args) ∷ [])
 ... | _ = unknown
-myast-of (def (quote _+_) (arg i1 a1 ∷ arg i2 a2 ∷ [])) = con (quote _:+_) (arg ai (myast-of a1) ∷ arg ai (myast-of a2) ∷ [])
+myast-of (def (quote _+_) (arg i1 a1 ∷ arg i2 a2 ∷ [])) =
+  con (quote _:+_) (arg ai (myast-of a1) ∷ arg ai (myast-of a2) ∷ [])
 myast-of _ = unknown
 \end{code}
 
