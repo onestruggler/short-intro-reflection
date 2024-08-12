@@ -225,7 +225,7 @@ Then
 -- e = id e = ⟦_⟧ ∘ [_] e = ⟦_⟧ ∘ f ∘ [_] e
 \end{code}
 
-The last is an expression with all ``\AgdaString{n + zero}'' replace by ``n''. Note that we can prove (2) by induction on the AST.
+The last is an expression with all ``\AgdaString{n + zero}'' replaced by ``n''. Note that we can prove (2) by induction on the AST.
 
 \begin{code}
 lemma-⟦⟧ : ∀ n a ->  ⟦ a ⟧ == ⟦ f n a ⟧
