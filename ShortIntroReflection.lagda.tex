@@ -360,7 +360,14 @@ q'⟦⟧ : Term -> Term → Term
 q'⟦⟧ n lhs = def (quote lemma-⟦⟧) (arg ai n ∷ arg ai lhs ∷ [])
 \end{code}
 
-A parameterised \AgdaPostulate{TC} computation that try to unify hole with provide solution. We only use agda buitins, so it's a little mess. Using do-notation will be cleaner. But still easy to see what's there: normalize the type of the hole >>= take out \AgdaFunction{lhs} >>= using \AgdaFunction{q'⟦⟧} on lhs to generate a proof sol >>= unify hole and sol.
+A parameterised \AgdaPostulate{TC} computation that try to unify hole with provide solution. We only use agda buitins, so it's a little mess. Using do-notation will be cleaner. But still easy to see what's there:
+
+\begin{enumerate}
+  \item normalize the type of the hole
+  \item take out \AgdaFunction{lhs}
+  \item use \AgdaFunction{q'⟦⟧} on lhs to generate a proof sol
+  \item unify hole and sol.
+\end{enumerate}
 
 \begin{code}
 comp : Term -> Term -> TC ⊤
