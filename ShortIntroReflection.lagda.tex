@@ -195,9 +195,7 @@ test-f : _==_ (f (succ zero) (Leaf zero :+ Leaf zero :+ Leaf (succ zero) :+ Leaf
 test-f = refl
 \end{code}
 
-How should we parse an expression to an AST? At least we can do manual
-parsing for finitely many expressions..... For now, suppose we have
-the translations:
+How should we parse an expression to an AST? At least we can do manual parsing for finitely many expressions\ldots{} For now, suppose we have the translations:
 
 \begin{code}
 -- [_] : arithmetic expression → AST
