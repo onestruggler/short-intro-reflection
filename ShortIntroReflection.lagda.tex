@@ -195,12 +195,12 @@ test-f : _==_ (f (succ zero) (Leaf zero :+ Leaf zero :+ Leaf (succ zero) :+ Leaf
 test-f = refl
 \end{code}
 
-How should we parse an expression to an AST? At least we can do manual parsing for finitely many expressions\ldots{} For now, suppose we have the translations:
+How should we parse an expression to an AST? At least we can do manual parsing for finitely many expressions\ldots{} For now, suppose we have the following translations, where ``\AgdaPostulate{AE}'' denotes the type of arithmetic expressions:
 
-\begin{code}
--- [_] : arithmetic expression → AST
--- ⟦_⟧ : AST → arithemtic expression
-\end{code}
+\begin{itemize}
+\item \AgdaFunction{[\AgdaUnderscore{}]} \AgdaSymbol{:} \AgdaPostulate{AE} \AgdaSymbol{→} \AgdaDatatype{AST}
+\item \AgdaFunction{⟦\AgdaUnderscore{}⟧} \AgdaSymbol{:} \AgdaDatatype{AST} \AgdaSymbol{→} \AgdaPostulate{AE}
+\end{itemize}
 
 AST to expression is easy:
 
