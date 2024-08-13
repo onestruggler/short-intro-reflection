@@ -72,7 +72,7 @@ There are two kinds of reflection:
 
 Both share ``reflection'', i.e., both manipulate the term (program) by AST and do not directly execute the term.
 
-Both 1) and 2) are used in Agda programming. Combing two seems good, and, actually, many have done so --- a quick GitHub search for ``agda reflection'' should yield a couple of interesting repos.
+Both 1) and 2) are used in Agda programming. Combing both seems good, and, actually, many have done so --- a quick GitHub search for ``agda reflection'' should yield a couple of interesting repos.
 
 By combining two, I mean, use 1) to get Agda-AST automatically, translate that Agda-AST representation to a user-defined AST, and \emph{then} do the proof under 2). This prevents 2)'s manual typing part. We will, however, see that there are complications in this combining.
 
