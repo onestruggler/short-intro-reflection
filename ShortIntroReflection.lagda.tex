@@ -74,7 +74,15 @@ Both share ``reflection'', i.e., both manipulate the term (program) by AST and d
 
 Both 1) and 2) are used in Agda programming. Combing both seems good, and, actually, many have done so --- a quick GitHub search for ``agda reflection'' should yield a couple of interesting repos.
 
-By combining two, I mean, use 1) to get Agda-AST automatically, translate that Agda-AST representation to a user-defined AST, and \emph{then} do the proof under 2). This prevents 2)'s manual typing part. We will, however, see that there are complications in this combining.
+``Combining both'' actually refers to the following sequence of steps:
+
+\begin{enumerate}
+  \item Use 1) to get Agda-AST automatically.
+  \item Translate the resulting Agda-AST representation to a user-defined AST.
+  \item Finally, do the proof under 2).
+\end{enumerate}
+
+This process prevents 2)'s manual typing part. We will, however, see that there are complications in this combining.
 
 We only explain the first kind. For the second kind, there is a very short and nice explanation in Section 4 of: \url{https://wiki.portal.chalmers.se/agda/pmwiki.php?n=Main.Documentation?action=download&upname=AgdaOverview2009.pdf}
 
