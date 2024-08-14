@@ -227,7 +227,7 @@ If we have properties about them:
 
 Then we see that \AgdaBound{e} equals \AgdaFunction{id} \AgdaBound{e}, which is equal to \AgdaSymbol(\AgdaFunction{⟦\AgdaUnderscore{}⟧} \AgdaOperator{\AgdaFunction{∘}} \AgdaFunction{[\AgdaUnderscore{}]}\AgdaSymbol) \AgdaBound{e}, which is equal to \AgdaSymbol(\AgdaFunction{⟦\AgdaUnderscore{}⟧} \AgdaOperator{\AgdaFunction{∘}} \AgdaBound{f} \AgdaOperator{\AgdaFunction{∘}} \AgdaFunction{[\AgdaUnderscore{}]}\AgdaSymbol) \AgdaBound{e}.
 
-The last is an expression with all ``\AgdaString{n + zero}'' replaced by ``n''. Note that we can prove (2) by induction on the AST.
+The last is an expression with all ``\AgdaString{n + zero}'' replaced by ``\AgdaString{n}''. Note that we can prove (2) by induction on the AST.
 
 \begin{code}
 lemma-⟦⟧ : ∀ n a →  ⟦ a ⟧ == ⟦ f n a ⟧
